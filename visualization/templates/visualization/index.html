@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Wizualizacja</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'visualization/style.css' %}">
+    <script src="{% static 'visualization/js/index.js' %}"></script>   
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">  
+    <script>
+      var url = "{% url 'visualization:result' %}"
+    </script>
+  
+  </head>
+  <body>
+    {% if test %}
+      {{ test|json_script:"id_test" }}
+    {% endif %}
+
+    <p>Wprowadź adresy</p>
+    <form action="{% url 'visualization:find' %}" method="post">
+      {% csrf_token %}
+      <fieldset>
+          <legend><h1>Adres</h1></legend>
+          {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+          <label for="address1">Adres 1</label>
+          <input type="text" name="address1" id="address1"><br>
+          <label for="address2">Adres 2</label>
+          <input type="text" name="address2" id="address2"><br>
+      </fieldset>
+      <input type="submit" value="Szukaj">
+      </form>
+    {% for place in places %}
+      {% if place.name %}
+        <p>Nazwa: {{ place.name }}</p>
+      {% endif %}
+      {% if place.osmId %}
+        <p>OSM id: {{ place.osmId }}</p>
+      {% endif %}
+      {% if place.latitude %}
+        <p>Szerokość geograficzna: {{ place.latitude }}</p>
+      {% endif %}
+      {% if place.longitude %}
+        <p>Długość geograficzna: {{ place.longitude }}</p>
+      {% endif %}
+    {% endfor %}
+
+    {% if distance %} <p>{{ distance }}</p> {% endif %}
+
+    <div id="div1"></div>
+  </body>
+</html>
