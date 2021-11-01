@@ -3,14 +3,15 @@
   <head>
     <meta charset="utf-8">
     <title>Wizualizacja</title>
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'visualization/style.css' %}">
-    <script src="{% static 'visualization/js/index.js' %}"></script>   
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">  
     <script>
       var url = "{% url 'visualization:result' %}"
     </script>
-  
+    {% load static %}
+    <script src='https://cdn.plot.ly/plotly-2.4.2.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js'></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'visualization/style.css' %}">
+    <script src="{% static 'visualization/js/index.js' %}"></script>   
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">  
   </head>
   <body>
     {% if test %}

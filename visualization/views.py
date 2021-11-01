@@ -5,12 +5,16 @@ import networkx as nx
 from datetime import timedelta
 from OSMPythonTools.nominatim import Nominatim
 from django.http import JsonResponse
+import plotly.graph_objects as go
+import numpy as np
 
 def index(request):
     context = {
         'input': 'hmm',
     }
     return render(request, 'visualization/index.html', context)
+
+coords = {}
 
 def find(request):
     # try:
@@ -63,8 +67,86 @@ def find(request):
     #     print(place['name'])
     #return HttpResponseRedirect(reverse('visualization:result', args=(address,)))
     #return render(request, 'visualization/index.html', context)
-    return render(request, 'visualization/index.html', JsonResponse({'test' : 'TEST'}))
+    global coords
+    coords = map()
+    return render(request, 'visualization/index.html', {'test' : 'TEST'})
 
 def result(request):
+    global coords
+    return JsonResponse(coords)
+
+def map():
+    # Defining the map boundaries 
+    north, east, south, west = 33.798, -84.378, 33.763, -84.422  
+    # Downloading the map as a graph object 
+    G = ox.graph_from_bbox(north, south, east, west, network_type = 'drive')  
+    # Plotting the map graph 
+    #ox.plot_graph(G)
+
+    # define origin and desination locations 
+    origin_point = (33.787201, -84.405076) 
+    destination_point = (33.764135, -84.394980)# get the nearest nodes to the locations 
+    origin_node = ox.get_nearest_node(G, origin_point) 
+    destination_node = ox.get_nearest_node(G, destination_point)# printing the closest node id to origin and destination points origin_node, destination_node
+
+    # Finding the optimal path 
+    route = nx.shortest_path(G, origin_node, destination_node, weight = 'length')
+
+    # getting coordinates of the nodes# we will store the longitudes and latitudes in following list 
+    long = [] 
+    lat = []  
+    for i in route:
+        point = G.nodes[i]
+        long.append(point['x'])
+        lat.append(point['y'])
+
+    #plot_path(lat, long, origin_point, destination_point)
+    return {'lon': long, 'lat': lat}
+
+def plot_path(lat, long, origin_point, destination_point):
     
-    return JsonResponse({'test' : 'TEST'})
+    """
+    Given a list of latitudes and longitudes, origin 
+    and destination point, plots a path on a map
+    
+    Parameters
+    ----------
+    lat, long: list of latitudes and longitudes
+    origin_point, destination_point: co-ordinates of origin
+    and destination    Returns
+    -------
+    Nothing. Only shows the map.
+    """    # adding the lines joining the nodes
+    fig = go.Figure(go.Scattermapbox(
+        name = "Path",
+        mode = "lines",
+        lon = long,
+        lat = lat,
+        marker = {'size': 10},
+        line = dict(width = 4.5, color = 'blue')))    # adding source marker
+    fig.add_trace(go.Scattermapbox(
+        name = "Source",
+        mode = "markers",
+        lon = [origin_point[1]],
+        lat = [origin_point[0]],
+        marker = {'size': 12, 'color':"red"}))
+     
+    # adding destination marker
+    fig.add_trace(go.Scattermapbox(
+        name = "Destination",
+        mode = "markers",
+        lon = [destination_point[1]],
+        lat = [destination_point[0]],
+        marker = {'size': 12, 'color':'green'}))
+    
+    # getting center for plots:
+    lat_center = np.mean(lat)
+    long_center = np.mean(long)    # defining the layout using mapbox_style
+    fig.update_layout(mapbox_style="stamen-terrain",
+        mapbox_center_lat = 30, mapbox_center_lon=-80)
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+                      mapbox = {
+                          'center': {'lat': lat_center, 
+                          'lon': long_center},
+                          'zoom': 13})
+    fig.show()
