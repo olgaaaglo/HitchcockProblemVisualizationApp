@@ -1,8 +1,3 @@
-// window.onload = function() { 
-//     var doc = document.getElementById('div1')
-//     doc.innerHTML += '{{ test }}'
-// }
-
 // d3.csv(
 // 	"https://raw.githubusercontent.com/plotly/datasets/master/2015_06_30_precipitation.csv",
 // 	function(err, rows) {
@@ -35,11 +30,10 @@
 // );
 
 
-fetch(url, {//'visualization/result', {
+fetch(url, {
     method: 'GET',
     headers:{
         'Content-Type': 'application/json',
-        //'X-Requested-With': 'XMLHttpRequest', //Necessary to work with request.is_ajax()
     },
 })
 .then(response => {
@@ -53,9 +47,8 @@ fetch(url, {//'visualization/result', {
     return result
 })
 .then(data => {
-    //Perform actions with the response data from the view
     console.log(data);
-    var data = [
+    var mapdata = [
         {
             type: "scattermapbox",
             lon: data['lon'],
@@ -64,17 +57,25 @@ fetch(url, {//'visualization/result', {
             mode: "lines"
         }
     ];
-
+    var reducer = (a, b) => (a + b)
+    
     var layout = {
         autosize: false,
         width: 500,
         height: 500,
         dragmode: "zoom",
-        mapbox: { style: "open-street-map", center: { lat: 33.7742915, lon: -84.4023762 }, zoom: 13 },
+        mapbox: { 
+                  style: "open-street-map", 
+                  center: { 
+                            lat: data['lat'].reduce(reducer)/data['lat'].length, 
+                            lon: data['lon'].reduce(reducer)/data['lon'].length 
+                          },
+                  zoom: 13 
+                },
         margin: { r: 0, t: 0, b: 0, l: 0 }
     };
 
-    Plotly.newPlot("div1", data, layout);
+    Plotly.newPlot("div1", mapdata, layout);
 })
 .catch(error => {
     console.log(error)
