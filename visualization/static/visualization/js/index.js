@@ -48,29 +48,38 @@ fetch(url, {
 })
 .then(data => {
     console.log(data);
-    var mapdata = [
-        {
-            type: "scattermapbox",
-            lon: data['lon'],
-            lat: data['lat'],
-            marker: { color: "fuchsia", size: 4 },
-            mode: "lines"
-        }
-    ];
-    var reducer = (a, b) => (a + b)
+    alldata = []
+    data = data["coords"]
     
+    //for (var i; i < data.length; i++)
+    //{
+        var mapdata = [
+            {
+                type: "scattermapbox",
+                lon: data[0]['lon'],
+                lat: data[0]['lat'],
+                marker: { color: "fuchsia", size: 4 },
+                mode: "lines"
+            }
+        ];
+
+        alldata.push(mapdata)
+    //}
+
+    var reducer = (a, b) => (a + b)
+        
     var layout = {
         autosize: false,
         width: 500,
         height: 500,
         dragmode: "zoom",
         mapbox: { 
-                  style: "open-street-map", 
-                  center: { 
-                            lat: data['lat'].reduce(reducer)/data['lat'].length, 
-                            lon: data['lon'].reduce(reducer)/data['lon'].length 
-                          },
-                  zoom: 13 
+                style: "open-street-map", 
+                center: { 
+                            lat: data[0]['lat'].reduce(reducer)/data[0]['lat'].length, 
+                            lon: data[0]['lon'].reduce(reducer)/data[0]['lon'].length 
+                        },
+                zoom: 13 
                 },
         margin: { r: 0, t: 0, b: 0, l: 0 }
     };

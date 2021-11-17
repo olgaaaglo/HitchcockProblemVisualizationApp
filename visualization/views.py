@@ -7,6 +7,7 @@ from OSMPythonTools.nominatim import Nominatim
 from django.http import JsonResponse
 import plotly.graph_objects as go
 import numpy as np
+import random as rnd
 
 def index(request):
     context = {
@@ -14,32 +15,48 @@ def index(request):
     }
     return render(request, 'visualization/index.html', context)
 
-coords = {}
+coords = []
 
 def find(request):
-    # try:
-    #     selected_choice = question.choice_set.get(pk=request.POST['choice'])
-    # except (KeyError, Choice.DoesNotExist):
-    #     # Redisplay the question voting form.
-    #     return render(request, 'polls/detail.html', {
-    #         'question': question,
-    #         'error_message': "You didn't select a choice.",
-    #     })
+    try:
+        city = request.POST['city']
+        nominatim = Nominatim()
+        place = nominatim.query(city)#.toJSON()[0]
 
-    address1 = request.POST['address1']
-    address2 = request.POST['address2']
-    nominatim = Nominatim()
-    place1 = nominatim.query(address1).toJSON()[0]
-    place2 = nominatim.query(address2).toJSON()[0]
+        graph_area = (place.displayName())
 
-    # graph_area = ("Kraków, Polska")
+        # Create the graph of the area from OSM data. It will download the data and create the graph
+        G = ox.graph_from_place(graph_area, network_type='drive')
 
-    # # Create the graph of the area from OSM data. It will download the data and create the graph
-    # G = ox.graph_from_place(graph_area, network_type='drive')
+        # OSM data are sometime incomplete so we use the speed module of osmnx to add missing edge speeds and travel times
+        G = ox.add_edge_speeds(G)
+        G = ox.add_edge_travel_times(G)
 
-    # # OSM data are sometime incomplete so we use the speed module of osmnx to add missing edge speeds and travel times
-    # G = ox.add_edge_speeds(G)
-    # G = ox.add_edge_travel_times(G)
+        print(len(G))
+        #print(G.adj)
+
+        adj_list = {}
+        for v in G.adj:
+            adj_list[v] = []
+            for u, value in G.adj[v].items():
+                adj_list[v].append({u : value[0]['length']})
+
+        #print(adj_list)
+
+        #fig, ax = ox.plot_graph(G, figsize=(10, 10), node_size=2, edge_color='y', edge_linewidth=0.2)
+
+        shops_nr = rnd.randint(4, 10)
+        #print(G.nodes())
+        shops = rnd.sample(G.nodes(), shops_nr*2)
+        warehouses = shops[len(shops)//2:]
+        shops = shops[:len(shops)//2]
+        print(shops)
+        print(warehouses)
+    except (KeyError):
+        # Redisplay the question voting form.
+        return render(request, 'visualization/index.html', {
+            'error_message': "You didn't select a choice.",
+        })
 
     # origin_coordinates = (float(place1.toJSON()[0]["lat"]), float(place1.toJSON()[0]["lon"]))
     # destination_coordinates = (float(place2.toJSON()[0]["lat"]), float(place2.toJSON()[0]["lon"]))
@@ -67,15 +84,19 @@ def find(request):
     #     print(place['name'])
     #return HttpResponseRedirect(reverse('visualization:result', args=(address,)))
     #return render(request, 'visualization/index.html', context)
+    
     global coords
-    coords = map(place1, place2)
-    return render(request, 'visualization/index.html', {'test' : 'TEST'})
+
+    for i in range(len(shops)):
+        print(G.nodes()[shops[i]])
+        coords.append(map(G.nodes()[shops[i]], G.nodes()[shops[i]], graph_area))
+    return render(request, 'visualization/index.html', {'shops_nr' : shops_nr})
 
 def result(request):
     global coords
-    return JsonResponse(coords)
+    return JsonResponse({"coords" : coords})
 
-def map(place1, place2):
+def map(place1, place2, graph_area):
     # # Defining the map boundaries 
     # north, east, south, west = 33.798, -84.378, 33.763, -84.422  
     # # Downloading the map as a graph object 
@@ -83,7 +104,7 @@ def map(place1, place2):
     # # Plotting the map graph 
     # #ox.plot_graph(G)
 
-    graph_area = ("Kraków, Polska")
+    #graph_area = ("Kraków, Polska")
 
     # Create the graph of the area from OSM data. It will download the data and create the graph
     G = ox.graph_from_place(graph_area, network_type='drive')
@@ -98,13 +119,13 @@ def map(place1, place2):
     # origin_node = ox.get_nearest_node(G, origin_point) 
     # destination_node = ox.get_nearest_node(G, destination_point)# printing the closest node id to origin and destination points origin_node, destination_node
 
-    origin_point = (float(place1["lat"]), float(place1["lon"]))
-    destination_point = (float(place2["lat"]), float(place2["lon"]))
+    origin_point = (float(place1["x"]), float(place1["y"]))
+    destination_point = (float(place2["x"]), float(place2["y"]))
     origin_node = ox.get_nearest_node(G, origin_point)
     destination_node = ox.get_nearest_node(G, destination_point)
 
     # Finding the optimal path 
-    route = nx.shortest_path(G, origin_node, destination_node, weight = 'length')
+    route = nx.shortest_path(G, origin_node, destination_node, weight = 'length') #potem nie będzie potrzebne
 
     # getting coordinates of the nodes# we will store the longitudes and latitudes in following list 
     long = [] 
@@ -117,50 +138,50 @@ def map(place1, place2):
     #plot_path(lat, long, origin_point, destination_point)
     return {'lon': long, 'lat': lat}
 
-def plot_path(lat, long, origin_point, destination_point):
+# def plot_path(lat, long, origin_point, destination_point):
     
-    """
-    Given a list of latitudes and longitudes, origin 
-    and destination point, plots a path on a map
+#     """
+#     Given a list of latitudes and longitudes, origin 
+#     and destination point, plots a path on a map
     
-    Parameters
-    ----------
-    lat, long: list of latitudes and longitudes
-    origin_point, destination_point: co-ordinates of origin
-    and destination    Returns
-    -------
-    Nothing. Only shows the map.
-    """    # adding the lines joining the nodes
-    fig = go.Figure(go.Scattermapbox(
-        name = "Path",
-        mode = "lines",
-        lon = long,
-        lat = lat,
-        marker = {'size': 10},
-        line = dict(width = 4.5, color = 'blue')))    # adding source marker
-    fig.add_trace(go.Scattermapbox(
-        name = "Source",
-        mode = "markers",
-        lon = [origin_point[1]],
-        lat = [origin_point[0]],
-        marker = {'size': 12, 'color':"red"}))
+#     Parameters
+#     ----------
+#     lat, long: list of latitudes and longitudes
+#     origin_point, destination_point: co-ordinates of origin
+#     and destination    Returns
+#     -------
+#     Nothing. Only shows the map.
+#     """    # adding the lines joining the nodes
+#     fig = go.Figure(go.Scattermapbox(
+#         name = "Path",
+#         mode = "lines",
+#         lon = long,
+#         lat = lat,
+#         marker = {'size': 10},
+#         line = dict(width = 4.5, color = 'blue')))    # adding source marker
+#     fig.add_trace(go.Scattermapbox(
+#         name = "Source",
+#         mode = "markers",
+#         lon = [origin_point[1]],
+#         lat = [origin_point[0]],
+#         marker = {'size': 12, 'color':"red"}))
      
-    # adding destination marker
-    fig.add_trace(go.Scattermapbox(
-        name = "Destination",
-        mode = "markers",
-        lon = [destination_point[1]],
-        lat = [destination_point[0]],
-        marker = {'size': 12, 'color':'green'}))
+#     # adding destination marker
+#     fig.add_trace(go.Scattermapbox(
+#         name = "Destination",
+#         mode = "markers",
+#         lon = [destination_point[1]],
+#         lat = [destination_point[0]],
+#         marker = {'size': 12, 'color':'green'}))
     
-    # getting center for plots:
-    lat_center = np.mean(lat)
-    long_center = np.mean(long)    # defining the layout using mapbox_style
-    fig.update_layout(mapbox_style="stamen-terrain",
-        mapbox_center_lat = 30, mapbox_center_lon=-80)
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
-                      mapbox = {
-                          'center': {'lat': lat_center, 
-                          'lon': long_center},
-                          'zoom': 13})
-    fig.show()
+#     # getting center for plots:
+#     lat_center = np.mean(lat)
+#     long_center = np.mean(long)    # defining the layout using mapbox_style
+#     fig.update_layout(mapbox_style="stamen-terrain",
+#         mapbox_center_lat = 30, mapbox_center_lon=-80)
+#     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+#                       mapbox = {
+#                           'center': {'lat': lat_center, 
+#                           'lon': long_center},
+#                           'zoom': 13})
+#     fig.show()

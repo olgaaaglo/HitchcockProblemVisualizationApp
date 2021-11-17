@@ -18,19 +18,20 @@
       {{ test|json_script:"id_test" }}
     {% endif %}
 
-    <p>Wprowadź adresy</p>
+    <p>Wizualizacja tras przewozu produktów z magazynów do sklepów</p>
     <form action="{% url 'visualization:find' %}" method="post">
       {% csrf_token %}
       <fieldset>
-          <legend><h1>Adres</h1></legend>
+          <legend><h1>Podaj miasto:</h1></legend>
           {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-          <label for="address1">Adres 1</label>
-          <input type="text" name="address1" id="address1"><br>
-          <label for="address2">Adres 2</label>
-          <input type="text" name="address2" id="address2"><br>
+          <input type="text" name="city" id="city"><br>
       </fieldset>
       <input type="submit" value="Szukaj">
       </form>
+    {% if shops_nr %}
+      <p>Wylosowano {{ shops_nr }} sklepów i magazynów</p>
+    {% endif %}
+
     {% for place in places %}
       {% if place.name %}
         <p>Nazwa: {{ place.name }}</p>
