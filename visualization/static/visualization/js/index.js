@@ -48,29 +48,33 @@ fetch(url, {
 })
 .then(data => {
     console.log(data);
-    alldata = []
+    alldata = [];
     data = data["coords"]
     
-    //for (var i; i < data.length; i++)
-    //{
-        var mapdata = [
-            {
+    colors = ["fuchsia", "red", "blue", "green", "orange", "yellow", "cyan", "purple", "black", "pink"]
+    console.log("grr1");
+    console.log(data.length);
+    for (var i = 0; i < data.length; i++)
+    {console.log("grr2.1");
+        //console.log(i);
+        var mapdata = {
                 type: "scattermapbox",
-                lon: data[0]['lon'],
-                lat: data[0]['lat'],
-                marker: { color: "fuchsia", size: 4 },
+                lon: data[i]['lon'],
+                lat: data[i]['lat'],
+                marker: { color: colors[i], size: 4 },
                 mode: "lines"
-            }
-        ];
-
+        };
+        //console.log("grr2.2");
+        //console.log(i);
         alldata.push(mapdata)
-    //}
-
+    }
+    console.log("grr3");
+    console.log(alldata);
     var reducer = (a, b) => (a + b)
         
     var layout = {
         autosize: false,
-        width: 500,
+        width: 1000,
         height: 500,
         dragmode: "zoom",
         mapbox: { 
@@ -83,8 +87,8 @@ fetch(url, {
                 },
         margin: { r: 0, t: 0, b: 0, l: 0 }
     };
-
-    Plotly.newPlot("div1", mapdata, layout);
+    console.log("grr4");
+    Plotly.newPlot("div1", alldata, layout);
 })
 .catch(error => {
     console.log(error)

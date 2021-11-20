@@ -32,7 +32,7 @@ def find(request):
         G = ox.add_edge_speeds(G)
         G = ox.add_edge_travel_times(G)
 
-        print(len(G))
+        print(len(G.nodes()))
         #print(G.adj)
 
         adj_list = {}
@@ -52,6 +52,13 @@ def find(request):
         shops = shops[:len(shops)//2]
         print(shops)
         print(warehouses)
+
+        global coords
+        coords = []
+        for i in range(len(shops)):
+            print(G.nodes()[shops[i]])
+            coords.append(map(G.nodes()[shops[i]], G.nodes()[warehouses[i]], G, shops[i], warehouses[i]))
+        return render(request, 'visualization/index.html', {'shops_nr' : shops_nr})
     except (KeyError):
         # Redisplay the question voting form.
         return render(request, 'visualization/index.html', {
@@ -84,34 +91,18 @@ def find(request):
     #     print(place['name'])
     #return HttpResponseRedirect(reverse('visualization:result', args=(address,)))
     #return render(request, 'visualization/index.html', context)
-    
-    global coords
-
-    for i in range(len(shops)):
-        print(G.nodes()[shops[i]])
-        coords.append(map(G.nodes()[shops[i]], G.nodes()[shops[i]], graph_area))
-    return render(request, 'visualization/index.html', {'shops_nr' : shops_nr})
 
 def result(request):
     global coords
     return JsonResponse({"coords" : coords})
 
-def map(place1, place2, graph_area):
+def map(place1, place2, G, shop, warehouse):
     # # Defining the map boundaries 
     # north, east, south, west = 33.798, -84.378, 33.763, -84.422  
     # # Downloading the map as a graph object 
     # G = ox.graph_from_bbox(north, south, east, west, network_type = 'drive')  
     # # Plotting the map graph 
     # #ox.plot_graph(G)
-
-    #graph_area = ("Kraków, Polska")
-
-    # Create the graph of the area from OSM data. It will download the data and create the graph
-    G = ox.graph_from_place(graph_area, network_type='drive')
-
-    # OSM data are sometime incomplete so we use the speed module of osmnx to add missing edge speeds and travel times
-    G = ox.add_edge_speeds(G)
-    G = ox.add_edge_travel_times(G)
 
     # define origin and desination locations 
     # origin_point = (33.787201, -84.405076) 
@@ -121,8 +112,15 @@ def map(place1, place2, graph_area):
 
     origin_point = (float(place1["x"]), float(place1["y"]))
     destination_point = (float(place2["x"]), float(place2["y"]))
-    origin_node = ox.get_nearest_node(G, origin_point)
-    destination_node = ox.get_nearest_node(G, destination_point)
+    origin_node = shop #ox.get_nearest_node(G, origin_point)
+    destination_node = warehouse #ox.get_nearest_node(G, destination_point)
+
+    print(origin_point)
+    print(destination_point)    
+    
+    print(origin_node)
+    print(destination_node)
+
 
     # Finding the optimal path 
     route = nx.shortest_path(G, origin_node, destination_node, weight = 'length') #potem nie będzie potrzebne
@@ -134,6 +132,10 @@ def map(place1, place2, graph_area):
         point = G.nodes[i]
         long.append(point['x'])
         lat.append(point['y'])
+
+    print("lonlat")
+    print(long)
+    print(lat)
 
     #plot_path(lat, long, origin_point, destination_point)
     return {'lon': long, 'lat': lat}
