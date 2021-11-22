@@ -61,13 +61,36 @@ fetch(url, {
                 type: "scattermapbox",
                 lon: data[i]['lon'],
                 lat: data[i]['lat'],
-                marker: { color: colors[i], size: 4 },
+                marker: { color: colors[i], size: 5 },
                 mode: "lines"
         };
+
+        var shop = {
+            type: "scattermapbox",
+            lon: [data[i]['lon'][0]],
+            lat: [data[i]['lat'][0]],
+            marker: { 'size': 12, 'color':"red" },
+            mode: "markers",
+            text:['Sklep']
+        };
+
+        var routeLen = data[i]['lon'].length;
+        var warehouse = {
+            type: "scattermapbox",
+            lon: [data[i]['lon'][routeLen - 1]],
+            lat: [data[i]['lat'][routeLen - 1]],
+            marker: { 'size': 12, 'color':"green" },
+            mode: "markers",
+            text:['Magazyn']
+        };
+
         //console.log("grr2.2");
         //console.log(i);
         alldata.push(mapdata)
+        alldata.push(shop)
+        alldata.push(warehouse)
     }
+
     console.log("grr3");
     console.log(alldata);
     var reducer = (a, b) => (a + b)

@@ -59,6 +59,7 @@ def find(request):
             print(G.nodes()[shops[i]])
             coords.append(map(G.nodes()[shops[i]], G.nodes()[warehouses[i]], G, shops[i], warehouses[i]))
         return render(request, 'visualization/index.html', {'shops_nr' : shops_nr})
+        #return render(request, 'visualization/index.html', {})
     except (KeyError):
         # Redisplay the question voting form.
         return render(request, 'visualization/index.html', {
@@ -128,14 +129,33 @@ def map(place1, place2, G, shop, warehouse):
     # getting coordinates of the nodes# we will store the longitudes and latitudes in following list 
     long = [] 
     lat = []  
-    for i in route:
-        point = G.nodes[i]
-        long.append(point['x'])
-        lat.append(point['y'])
+    for i in range(len(route) - 1):
+        point1 = G.nodes[route[i]]
+        point2 = G.nodes[route[i+1]]
+        for j in list(G.edges(data=True)):
+            if (j[0]==route[i]) and (j[1]==route[i+1]):
+                if 'geometry' in j[2]:
+                    x, y = j[2]['geometry'].xy
+                    for k in range(len(x)):
+                        long.append(x[k])
+                        lat.append(y[k])
+                else:
+                    long.append(point1['x'])
+                    lat.append(point1['y'])
+                    long.append(point2['x'])
+                    lat.append(point2['y'])
 
-    print("lonlat")
-    print(long)
-    print(lat)
+
+    # long = [] 
+    # lat = []  
+    # for i in route:
+    #     point = G.nodes[i]
+    #     long.append(point['x'])
+    #     lat.append(point['y'])
+
+    # print("lonlat")
+    # print(long)
+    # print(lat)
 
     #plot_path(lat, long, origin_point, destination_point)
     return {'lon': long, 'lat': lat}

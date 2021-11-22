@@ -14,17 +14,18 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">  
   </head>
   <body>
+    <div id="main">
     {% if test %}
       {{ test|json_script:"id_test" }}
     {% endif %}
 
-    <p>Wizualizacja tras przewozu produktów z magazynów do sklepów</p>
+    <h2>Wizualizacja tras przewozu produktów z magazynów do sklepów</h2>
     <form action="{% url 'visualization:find' %}" method="post">
       {% csrf_token %}
       <fieldset>
-          <legend><h1>Podaj miasto:</h1></legend>
+          <p>Podaj miasto:</p>
           {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-          <input type="text" name="city" id="city"><br>
+          <input type="text" name="city" id="city">
       </fieldset>
       <input type="submit" value="Szukaj">
       </form>
@@ -32,23 +33,7 @@
       <p>Wylosowano {{ shops_nr }} sklepów i magazynów</p>
     {% endif %}
 
-    {% for place in places %}
-      {% if place.name %}
-        <p>Nazwa: {{ place.name }}</p>
-      {% endif %}
-      {% if place.osmId %}
-        <p>OSM id: {{ place.osmId }}</p>
-      {% endif %}
-      {% if place.latitude %}
-        <p>Szerokość geograficzna: {{ place.latitude }}</p>
-      {% endif %}
-      {% if place.longitude %}
-        <p>Długość geograficzna: {{ place.longitude }}</p>
-      {% endif %}
-    {% endfor %}
-
-    {% if distance %} <p>{{ distance }}</p> {% endif %}
-
     <div id="div1"></div>
+  </div>
   </body>
 </html>
