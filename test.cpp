@@ -5,19 +5,19 @@
 #include <fstream>
 
 int main(){
-    std::cout << "hello"<< std::endl;
-    std::string myText;
-    std::ifstream MyReadFile("input.txt");
+    // std::cout << "hello"<< std::endl;
+    // std::string myText;
+    // std::ifstream MyReadFile("input.txt");
 
-    while (getline (MyReadFile, myText)) {
-    //std::cout << myText;
-    }
+    // while (getline (MyReadFile, myText)) {
+    // //std::cout << myText;
+    // }
 
-    MyReadFile.close(); 
+    // MyReadFile.close(); 
 
-    std::ofstream MyFile("output.txt");
-    MyFile << "out";
-    MyFile.close();
+    // std::ofstream MyFile("output.txt");
+    // MyFile << "out";
+    // MyFile.close();
 
 
     // std::ifstream people_file("input.json", std::ifstream::binary);

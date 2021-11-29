@@ -1,11 +1,8 @@
 from django.shortcuts import render
-#from django.http import HttpResponse, HttpResponseRedirect
 import osmnx as ox
 import networkx as nx
 from OSMPythonTools.nominatim import Nominatim
 from django.http import JsonResponse
-#import plotly.graph_objects as go
-#import numpy as np
 import random as rnd
 from subprocess import Popen
 import copy
@@ -22,19 +19,22 @@ def find(request):
         print(len(G.nodes()))
         #print(G.adj)
 
-        #fig, ax = ox.plot_graph(G, figsize=(10, 10), node_size=2, edge_color='y', edge_linewidth=0.2)
-
         shops_nr, shops, warehouses, shops_needs, warehouses_loads = randomize_places(G)
 
         write_to_file(G, shops, warehouses, shops_needs, warehouses_loads)
 
-        get_results()
+        routes = get_results()
 
         global coords
         coords = []
-        for i in range(len(shops)):
-            print(G.nodes()[shops[i]])
-            coords.append(map(G, shops[i], warehouses[i]))
+        # for i in range(len(shops)):
+        #     print(G.nodes()[shops[i]])
+        #     coords.append(map(G, shops[i], warehouses[i]))
+        # coords.append(map(G, shops[0], warehouses[1]))
+        # coords.append(map(G, shops[1], warehouses[1]))
+        # coords.append(map(G, shops[2], warehouses[0]))
+        for route in routes:
+            coords.append(map(G, route))
         return render(request, 'visualization/index.html', {'shops_nr' : shops_nr})
         #return render(request, 'visualization/index.html', {})
     # except (TypeError):
@@ -55,7 +55,7 @@ def get_graph(city):
     return G
 
 def randomize_places(G):
-    shops_nr = rnd.randint(4, 10)
+    shops_nr = 3 #rnd.randint(4, 10)
     shops = rnd.sample(G.nodes(), shops_nr*2)
 
     warehouses = shops[len(shops)//2:] #czy magazynow moze byc wiecej niz sklepow
@@ -82,18 +82,18 @@ def write_to_file(G, shops, warehouses, shops_needs, warehouses_loads):
     input_file.write("\n")
 
     for v in G.adj:
-        input_file.write(str(nodes.index(v)) + ": ")
+        input_file.write(str(nodes.index(v) + 1) + ": ")
         for u, value in G.adj[v].items():
-            input_file.write(str(nodes.index(u)) + " " + str(value[0]['length']) + " ")
+            input_file.write(str(nodes.index(u) + 1) + " " + str(value[0]['length']) + " ")
         input_file.write("\n")
         
     input_file.write("---\n")
     for i in range(len(shops)):
-        input_file.write(str(nodes.index(shops[i])) + " " + str(shops_needs[i]) + " ")
+        input_file.write(str(nodes.index(shops[i]) + 1) + " " + str(shops_needs[i]) + " ")
 
     input_file.write("\n---\n")
     for i in range(len(warehouses)):
-        input_file.write(str(nodes.index(warehouses[i])) + " " + str(warehouses_loads[i]) + " ")
+        input_file.write(str(nodes.index(warehouses[i]) + 1) + " " + str(warehouses_loads[i]) + " ")
     
     input_file.close()
 
@@ -101,30 +101,36 @@ def get_results():
     Popen(['./a.out'])
 
     output_file = open("output.txt", "r")
-    print(output_file.read())
+    routes = output_file.read()
+
+    results = [[int(i) for i in route.split()] for route in routes.split('\n\n')] #jeszcze trzeba bedzie zamienic indeksowanie
+
     output_file.close()
+
+    return results
 
 def result(request):
     global coords
     return JsonResponse({"coords" : coords})
 
-def map(G, shop, warehouse):
+def map(G, route): #shop, warehouse):
 
-    place1 = G.nodes()[shop]
-    place2 = G.nodes()[warehouse]
+    # place1 = G.nodes()[shop]
+    # place2 = G.nodes()[warehouse]
 
-    origin_point = (float(place1["x"]), float(place1["y"]))
-    destination_point = (float(place2["x"]), float(place2["y"]))
-    origin_node = shop
-    destination_node = warehouse
+    # origin_point = (float(place1["x"]), float(place1["y"]))
+    # destination_point = (float(place2["x"]), float(place2["y"]))
+    # origin_node = shop
+    # destination_node = warehouse
 
-    print(origin_point)
-    print(destination_point)    
+    # print(origin_point)
+    # print(destination_point)    
     
-    print(origin_node)
-    print(destination_node)
+    # print(origin_node)
+    # print(destination_node)
 
-    route = nx.shortest_path(G, origin_node, destination_node, weight = 'length') #potem nie będzie potrzebne
+    # route = nx.shortest_path(G, origin_node, destination_node, weight = 'length') #potem nie będzie potrzebne
+    print("route in map() " + str(route))
 
     long = [] 
     lat = []  
