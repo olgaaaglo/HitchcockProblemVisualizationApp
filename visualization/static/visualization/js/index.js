@@ -17,35 +17,38 @@ fetch(url, {
 .then(data => {
     console.log(data);
     alldata = [];
-    data = data["coords"]
+    coords = data["coords"]
+    lengths = data["lengths"]
+    cargos = data["cargos"]
     
     colors = ["fuchsia", "red", "blue", "green", "orange", "yellow", "cyan", "purple", "black", "pink"]
-    console.log(data.length);
+    console.log(coords.length);
 
-    for (var i = 0; i < data.length; i++)
+    for (var i = 0; i < coords.length; i++)
     {
         var mapdata = {
                 type: "scattermapbox",
-                lon: data[i]['lon'],
-                lat: data[i]['lat'],
+                lon: coords[i]['lon'],
+                lat: coords[i]['lat'],
                 marker: { color: colors[i], size: 5 },
-                mode: "lines"
+                mode: "lines",
+                text: "Length: " + lengths[i] + ", Cargo: " + cargos[i]
         };
 
         var shop = {
             type: "scattermapbox",
-            lon: [data[i]['lon'][0]],
-            lat: [data[i]['lat'][0]],
+            lon: [coords[i]['lon'][0]],
+            lat: [coords[i]['lat'][0]],
             marker: { 'size': 12, 'color':"red" },
             mode: "markers",
             text:['Sklep']
         };
 
-        var routeLen = data[i]['lon'].length;
+        var routeLen = coords[i]['lon'].length;
         var warehouse = {
             type: "scattermapbox",
-            lon: [data[i]['lon'][routeLen - 1]],
-            lat: [data[i]['lat'][routeLen - 1]],
+            lon: [coords[i]['lon'][routeLen - 1]],
+            lat: [coords[i]['lat'][routeLen - 1]],
             marker: { 'size': 12, 'color':"green" },
             mode: "markers",
             text:['Magazyn']
@@ -67,8 +70,8 @@ fetch(url, {
         mapbox: { 
                 style: "open-street-map", 
                 center: { 
-                            lat: data[0]['lat'].reduce(reducer)/data[0]['lat'].length, 
-                            lon: data[0]['lon'].reduce(reducer)/data[0]['lon'].length 
+                            lat: coords[0]['lat'].reduce(reducer)/coords[0]['lat'].length, 
+                            lon: coords[0]['lon'].reduce(reducer)/coords[0]['lon'].length 
                         },
                 zoom: 13 
                 },

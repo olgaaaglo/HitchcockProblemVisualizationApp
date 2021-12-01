@@ -5,12 +5,11 @@ from OSMPythonTools.nominatim import Nominatim
 from django.http import JsonResponse
 import random as rnd
 from subprocess import Popen
-import copy
 
 def index(request):
     return render(request, 'visualization/index.html')
 
-coords = []
+results = {}
 
 def find(request):
     #try:
@@ -19,14 +18,17 @@ def find(request):
         print(len(G.nodes()))
         #print(G.adj)
 
-        shops_nr, shops, warehouses, shops_needs, warehouses_loads = randomize_places(G)
+        shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads = randomize_places(G)
 
         write_to_file(G, shops, warehouses, shops_needs, warehouses_loads)
 
-        routes = get_results()
+        routes, lengths, cargos = get_results(list(G.nodes()))
 
-        global coords
-        coords = []
+        global results
+        results["coords"] = []
+        results["lengths"] = lengths
+        results["cargos"] = cargos
+
         # for i in range(len(shops)):
         #     print(G.nodes()[shops[i]])
         #     coords.append(map(G, shops[i], warehouses[i]))
@@ -34,8 +36,8 @@ def find(request):
         # coords.append(map(G, shops[1], warehouses[1]))
         # coords.append(map(G, shops[2], warehouses[0]))
         for route in routes:
-            coords.append(map(G, route))
-        return render(request, 'visualization/index.html', {'shops_nr' : shops_nr})
+            results["coords"].append(map(G, route))
+        return render(request, 'visualization/index.html', {'shops_nr' : shops_nr, 'warehouses_nr' : warehouses_nr})
         #return render(request, 'visualization/index.html', {})
     # except (TypeError):
     #     return render(request, 'visualization/index.html', {
@@ -55,27 +57,28 @@ def get_graph(city):
     return G
 
 def randomize_places(G):
-    shops_nr = 3 #rnd.randint(4, 10)
-    shops = rnd.sample(G.nodes(), shops_nr*2)
+    shops_nr = 200 #rnd.randint(4, 10)
+    warehouses_nr = 100 #rnd.randint(4, shops_nr)
+    all = rnd.sample(G.nodes(), shops_nr + warehouses_nr)
 
-    warehouses = shops[len(shops)//2:] #czy magazynow moze byc wiecej niz sklepow
-    shops = shops[:len(shops)//2]
+    shops = all[:shops_nr]
+    warehouses = all[shops_nr:]
 
-    print(shops)
-    print(warehouses)
+    #print(shops)
+    #print(warehouses)
 
     shops_needs = []
     warehouses_loads = []
 
-    for i in range(len(shops)):
+    for i in range(shops_nr):
         shops_needs.append(rnd.randint(10, 40) * 10)
-    for i in range(len(warehouses)):
+    for i in range(warehouses_nr):
         warehouses_loads.append(rnd.randint(10, 40) * 10)
     
-    return shops_nr, shops, warehouses, shops_needs, warehouses_loads
+    return shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads
 
 def write_to_file(G, shops, warehouses, shops_needs, warehouses_loads):
-    nodes = list(G.nodes()) #copy.deepcopy(list(G.nodes()))
+    nodes = list(G.nodes())
 
     input_file = open("input.txt", "w")
     input_file.write(str(len(G.nodes())))
@@ -97,21 +100,30 @@ def write_to_file(G, shops, warehouses, shops_needs, warehouses_loads):
     
     input_file.close()
 
-def get_results():
+def get_results(nodes):
     Popen(['./a.out'])
 
-    output_file = open("output.txt", "r")
-    routes = output_file.read()
+    output_file = open("out.txt", "r")
+    output = output_file.read().split('\n---\n')
+    routes = output[0]
+    cargos = output[1].split('\n')
 
-    results = [[int(i) for i in route.split()] for route in routes.split('\n\n')] #jeszcze trzeba bedzie zamienic indeksowanie
+    #results = [[int(i) for i in route.split()] for route in routes.split('\n')] #jeszcze trzeba bedzie zamienic indeksowanie
+
+    results = []
+    lengths = []
+    for route in routes.split('\n'):
+        array = route.split()
+        results.append([nodes[int(i) - 1] for i in array[:len(array) - 1]])
+        lengths.append(float(array[len(array) - 1]))
 
     output_file.close()
 
-    return results
+    return results, lengths, cargos
 
 def result(request):
-    global coords
-    return JsonResponse({"coords" : coords})
+    global results
+    return JsonResponse(results)
 
 def map(G, route): #shop, warehouse):
 

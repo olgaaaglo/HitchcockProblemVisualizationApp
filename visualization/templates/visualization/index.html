@@ -26,9 +26,15 @@
       </fieldset>
       <input type="submit" value="Szukaj">
       </form>
-    {% if shops_nr %}
-      <p>Wylosowano {{ shops_nr }} sklepów i magazynów</p>
-    {% endif %}
+    <p>
+      Wylosowano
+      {% if shops_nr %}  
+        {{ shops_nr }} sklepów, 
+      {% endif %} 
+      {% if warehouses_nr %} 
+        {{ warehouses_nr }} magazynów
+      {% endif %}
+    </p>
 
     <div id="div1"></div>
   </div>
