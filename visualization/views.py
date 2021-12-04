@@ -22,12 +22,19 @@ def find(request):
 
         write_to_file(G, shops, warehouses, shops_needs, warehouses_loads)
 
-        routes, lengths, cargos = get_results(list(G.nodes()))
+        routes, lengths, cargos = get_results(list(G.nodes()), G)
 
         global results
         results["coords"] = []
         results["lengths"] = lengths
         results["cargos"] = cargos
+        ####################################
+        #shops = [17, 99, 383, 235, 338]
+        shops = [303, 161, 131, 168, 328, 260, 255]
+        nodes = list(G.nodes())
+        results["shops"] = shops #[nodes.index(shop) + 1 for shop in shops]
+        results["shops_in_routes"] = [nodes.index(route[0]) + 1 for route in routes]
+        results["warehouses_in_routes"] = [nodes.index(route[len(route) - 1]) + 1 for route in routes]
 
         # for i in range(len(shops)):
         #     print(G.nodes()[shops[i]])
@@ -57,8 +64,8 @@ def get_graph(city):
     return G
 
 def randomize_places(G):
-    shops_nr = 200 #rnd.randint(4, 10)
-    warehouses_nr = 100 #rnd.randint(4, shops_nr)
+    shops_nr = rnd.randint(4, 10)
+    warehouses_nr = rnd.randint(4, shops_nr)
     all = rnd.sample(G.nodes(), shops_nr + warehouses_nr)
 
     shops = all[:shops_nr]
@@ -100,22 +107,29 @@ def write_to_file(G, shops, warehouses, shops_needs, warehouses_loads):
     
     input_file.close()
 
-def get_results(nodes):
+def get_results(nodes, G):
     Popen(['./a.out'])
 
-    output_file = open("out.txt", "r")
+    output_file = open("out1.txt", "r")
     output = output_file.read().split('\n---\n')
     routes = output[0]
     cargos = output[1].split('\n')
 
-    #results = [[int(i) for i in route.split()] for route in routes.split('\n')] #jeszcze trzeba bedzie zamienic indeksowanie
-
     results = []
     lengths = []
-    for route in routes.split('\n'):
-        array = route.split()
-        results.append([nodes[int(i) - 1] for i in array[:len(array) - 1]])
-        lengths.append(float(array[len(array) - 1]))
+    for count, route in enumerate(routes.split('\n')):
+        if cargos[count] != '0':
+            array = route.split()
+            results.append([nodes[int(i) - 1] for i in array[:len(array) - 1]])
+            lengths.append(float(array[len(array) - 1]))
+        
+        # if int(array[0]) == 383 and int(array[len(array) - 2]) == 327:
+        #     print(array[len(array) - 2])
+        #     print(G.nodes[nodes[int(array[0]) - 1]]['x'])
+        #     print(nodes[int(array[0]) - 1])
+        #     print(nodes[int(array[len(array) - 2]) - 1])
+    
+    cargos = [cargo for cargo in cargos if cargo != '0']
 
     output_file.close()
 
@@ -142,24 +156,46 @@ def map(G, route): #shop, warehouse):
     # print(destination_node)
 
     # route = nx.shortest_path(G, origin_node, destination_node, weight = 'length') #potem nie będzie potrzebne
-    print("route in map() " + str(route))
+    #print("route in map() " + str(route))
+
+    if route[0] == 2763834671 and route[len(route) - 1] == 2181202348: 
+        print([G.nodes[r]['x'] for r in route])
 
     long = [] 
     lat = []  
     for i in range(len(route) - 1):
         point1 = G.nodes[route[i]]
         point2 = G.nodes[route[i+1]]
+
+        best_edge = None
         for j in list(G.edges(data=True)):
             if (j[0]==route[i]) and (j[1]==route[i+1]):
-                if 'geometry' in j[2]:
-                    x, y = j[2]['geometry'].xy
-                    for k in range(len(x)):
-                        long.append(x[k])
-                        lat.append(y[k])
-                else:
-                    long.append(point1['x'])
-                    lat.append(point1['y'])
-                    long.append(point2['x'])
-                    lat.append(point2['y'])
+                if best_edge == None or best_edge[2]['length'] > j[2]['length']:
+                    best_edge = j
+        if best_edge == None:
+            long.append(point1['x'])
+            lat.append(point1['y'])
+            long.append(point2['x'])
+            lat.append(point2['y'])
+        else:
+            if 'geometry' in best_edge[2]:
+                x, y = best_edge[2]['geometry'].xy
+                if route[0] == 2763834671 and route[len(route) - 1] == 2181202348: 
+                    print("xxxxxxxxxxxxxxx")
+                    print(x)
+                for k in range(len(x)):
+                    long.append(x[k])
+                    lat.append(y[k])
+            else:
+                print('no geometry')
+                long.append(point1['x'])
+                lat.append(point1['y'])
+                long.append(point2['x'])
+                lat.append(point2['y'])
+
+
+    if(route[0] == 2763834671)  and route[len(route) - 1] == 2181202348:
+        print(long)
+        print(lat)
 
     return {'lon': long, 'lat': lat}

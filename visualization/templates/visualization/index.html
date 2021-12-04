@@ -25,16 +25,11 @@
           <input type="text" name="city" id="city">
       </fieldset>
       <input type="submit" value="Szukaj">
-      </form>
-    <p>
-      Wylosowano
-      {% if shops_nr %}  
-        {{ shops_nr }} sklepów, 
-      {% endif %} 
-      {% if warehouses_nr %} 
-        {{ warehouses_nr }} magazynów
-      {% endif %}
-    </p>
+    </form>
+          
+    {% if shops_nr and warehouses_nr%}  
+      <p> Wylosowano {{ shops_nr }} sklepów i {{ warehouses_nr }} magazynów. </p>
+    {% endif %} 
 
     <div id="div1"></div>
   </div>

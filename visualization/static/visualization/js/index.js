@@ -20,28 +20,34 @@ fetch(url, {
     coords = data["coords"]
     lengths = data["lengths"]
     cargos = data["cargos"]
+    shops = data['shops']
+    shops_in_routes = data['shops_in_routes']
+    warehouses_in_routes = data['warehouses_in_routes']
     
-    colors = ["fuchsia", "red", "blue", "green", "orange", "yellow", "cyan", "purple", "black", "pink"]
-    console.log(coords.length);
+    colors = ["fuchsia", "blue", "green", "orange", "cyan", "purple", "black", "pink", "brown", "yellow"]
 
     for (var i = 0; i < coords.length; i++)
     {
+        shop_color = colors[shops.indexOf(shops_in_routes[i])]
+
         var mapdata = {
                 type: "scattermapbox",
                 lon: coords[i]['lon'],
                 lat: coords[i]['lat'],
-                marker: { color: colors[i], size: 5 },
+                marker: { color: shop_color, size: 5 },
                 mode: "lines",
-                text: "Length: " + lengths[i] + ", Cargo: " + cargos[i]
+                text: "Length: " + lengths[i] + ", Cargo: " + cargos[i],
+                name: "Route " + warehouses_in_routes[i] + "-" + shops_in_routes[i]
         };
 
         var shop = {
             type: "scattermapbox",
             lon: [coords[i]['lon'][0]],
             lat: [coords[i]['lat'][0]],
-            marker: { 'size': 12, 'color':"red" },
+            marker: { 'size': 12, 'color':shop_color },
             mode: "markers",
-            text:['Sklep']
+            text:['Sklep'],
+            name: shops_in_routes[i]
         };
 
         var routeLen = coords[i]['lon'].length;
@@ -49,9 +55,10 @@ fetch(url, {
             type: "scattermapbox",
             lon: [coords[i]['lon'][routeLen - 1]],
             lat: [coords[i]['lat'][routeLen - 1]],
-            marker: { 'size': 12, 'color':"green" },
+            marker: { 'size': 12, 'color':"red" },
             mode: "markers",
-            text:['Magazyn']
+            text:['Magazyn'],
+            name: warehouses_in_routes[i]
         };
 
         alldata.push(mapdata)
