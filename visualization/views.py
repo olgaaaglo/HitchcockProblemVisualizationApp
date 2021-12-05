@@ -15,33 +15,25 @@ def find(request):
     #try:
         G = get_graph(request.POST['city'])
 
-        print(len(G.nodes()))
-
         shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads = randomize_places(G)
 
         write_to_file(G, shops, warehouses, shops_needs, warehouses_loads)
 
-        routes, lengths, cargos = get_results(list(G.nodes()), G)
+        routes, lengths, cargos = get_results(list(G.nodes()))
 
         global results
         results["coords"] = []
         results["lengths"] = lengths
         results["cargos"] = cargos
-        ####################################
-        #shops = [17, 99, 383, 235, 338]
-        #shops = [303, 161, 131, 168, 328, 260, 255]
+        
         nodes = list(G.nodes())
         results["shops"] = [nodes.index(shop) + 1 for shop in shops]
-        print(shops)
-        print(results["shops"])
         results["shops_in_routes"] = [nodes.index(route[0]) + 1 for route in routes]
         results["warehouses_in_routes"] = [nodes.index(route[len(route) - 1]) + 1 for route in routes]
-        print(results["shops_in_routes"])
 
         for route in routes:
             results["coords"].append(map(G, route))
         return render(request, 'visualization/index.html', {'shops_nr' : shops_nr, 'warehouses_nr' : warehouses_nr})
-        #return render(request, 'visualization/index.html', {})
     # except (TypeError):
     #     return render(request, 'visualization/index.html', {
     #         'error_message': "Nie podano miasta.",
@@ -66,9 +58,6 @@ def randomize_places(G):
 
     shops = all[:shops_nr]
     warehouses = all[shops_nr:]
-
-    #print(shops)
-    #print(warehouses)
 
     shops_needs = []
     warehouses_loads = []
@@ -104,8 +93,8 @@ def write_to_file(G, shops, warehouses, shops_needs, warehouses_loads):
     input_file.write("\n---")
     input_file.close()
 
-def get_results(nodes, G):
-    process = Popen(['./../algo/SimulatedAnnealingInTheHitchcockProblem/bin/Hitchcock', 'input.txt'])
+def get_results(nodes):
+    process = Popen(['./../Algo/SimulatedAnnealingInTheHitchcockProblem/bin/Hitchcock', 'input.txt'])
     process.wait()
 
     output_file = open("output.txt", "r")
@@ -116,7 +105,6 @@ def get_results(nodes, G):
     results = []
     lengths = []
     for count, route in enumerate(routes.split('\n')):
-        print(count, route)
         if cargos[count] != '0':
             array = route.split()
             results.append([nodes[int(i) - 1] for i in array[:len(array) - 1]])
