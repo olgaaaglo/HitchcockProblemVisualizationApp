@@ -24,7 +24,7 @@ fetch(url, {
     shops_in_routes = data['shops_in_routes']
     warehouses_in_routes = data['warehouses_in_routes']
     
-    colors = ["fuchsia", "blue", "green", "orange", "cyan", "purple", "black", "pink", "brown", "yellow"]
+    colors = ["fuchsia", "blue", "green", "orange", "cyan", "purple", "black", "hotpink", "brown", "yellow"]
 
     for (var i = 0; i < coords.length; i++)
     {
