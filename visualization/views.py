@@ -1,6 +1,5 @@
 from django.shortcuts import render
 import osmnx as ox
-import networkx as nx
 from OSMPythonTools.nominatim import Nominatim
 from django.http import JsonResponse
 import random as rnd
@@ -12,7 +11,7 @@ def index(request):
 results = {}
 
 def find(request):
-    #try:
+    try:
         G = get_graph(request.POST['city'])
 
         shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads = randomize_places(G)
@@ -34,10 +33,10 @@ def find(request):
         for route in routes:
             results["coords"].append(map(G, route))
         return render(request, 'visualization/index.html', {'shops_nr' : shops_nr, 'warehouses_nr' : warehouses_nr})
-    # except (TypeError):
-    #     return render(request, 'visualization/index.html', {
-    #         'error_message': "Nie podano miasta.",
-    #     })
+    except (TypeError):
+        return render(request, 'visualization/index.html', {
+            'error_message': "Nie podano miasta.",
+        })
 
 def get_graph(city):
     nominatim = Nominatim()
