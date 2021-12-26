@@ -6,6 +6,5 @@ app_name = 'visualization'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('find/', views.find, name='find'),
-    path('result/', views.result, name='result'),
+    path('find/<str:city>', views.find, name='find')
 ]

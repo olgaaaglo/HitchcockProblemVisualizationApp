@@ -8,11 +8,10 @@ from subprocess import Popen
 def index(request):
     return render(request, 'visualization/index.html')
 
-results = {}
 
-def find(request):
-    try:
-        G = get_graph(request.POST['city'])
+def find(request, city):
+    try: #naprawic
+        G = get_graph(city)
 
         shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads = randomize_places(G)
 
@@ -20,19 +19,22 @@ def find(request):
 
         routes, lengths, cargos = get_results(list(G.nodes()))
 
-        global results
-        results["coords"] = []
-        results["lengths"] = lengths
-        results["cargos"] = cargos
-        
         nodes = list(G.nodes())
-        results["shops"] = [nodes.index(shop) + 1 for shop in shops]
-        results["shops_in_routes"] = [nodes.index(route[0]) + 1 for route in routes]
-        results["warehouses_in_routes"] = [nodes.index(route[len(route) - 1]) + 1 for route in routes]
 
-        for route in routes:
-            results["coords"].append(map(G, route))
-        return render(request, 'visualization/index.html', {'shops_nr' : shops_nr, 'warehouses_nr' : warehouses_nr})
+        results = []
+        for i, route in enumerate(routes):
+            results.append({
+                "coords" : map(G, route),
+                "length" : lengths[i],
+                "cargo" : cargos[i],
+                "shop" : nodes.index(route[0]) + 1,
+                "warehouse" : nodes.index(route[len(route) - 1]) + 1
+            })
+            
+        input_data = {'shops_nr' : shops_nr, 'warehouses_nr' : warehouses_nr, 
+                      'shops' : [nodes.index(shop) + 1 for shop in shops], 'warehouses' : [nodes.index(warehouse) + 1 for warehouse in warehouses],
+                      'shops_needs' : shops_needs, 'warehouses_loads' : warehouses_loads}
+        return JsonResponse({'results' : results, 'input_data' : input_data})
     except (TypeError):
         return render(request, 'visualization/index.html', {
             'error_message': "Nie podano miasta.",
@@ -44,9 +46,6 @@ def get_graph(city):
 
     graph_area = (place.displayName())
     G = ox.graph_from_place(graph_area, network_type='drive')
-
-    G = ox.add_edge_speeds(G)
-    G = ox.add_edge_travel_times(G)
 
     return G
 
@@ -114,10 +113,6 @@ def get_results(nodes):
     output_file.close()
 
     return results, lengths, cargos
-
-def result(request):
-    global results
-    return JsonResponse(results)
 
 def map(G, route):
     long = [] 

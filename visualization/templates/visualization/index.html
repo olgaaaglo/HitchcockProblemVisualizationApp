@@ -3,9 +3,6 @@
   <head>
     <meta charset="utf-8">
     <title>Wizualizacja</title>
-    <script>
-      var url = "{% url 'visualization:result' %}"
-    </script>
     {% load static %}
     <script src='https://cdn.plot.ly/plotly-2.4.2.min.js'></script>
     <link rel="stylesheet" type="text/css" href="{% static 'visualization/style.css' %}">
@@ -16,7 +13,7 @@
     <div id="main">
 
     <h2>Wizualizacja tras przewozu produktów z magazynów do sklepów</h2>
-    <form action="{% url 'visualization:find' %}" method="post">
+    <form action="javascript:visualize()" method="post">
       {% csrf_token %}
       <fieldset>
           <p>Podaj miasto:</p>
@@ -25,15 +22,9 @@
       </fieldset>
       <input type="submit" value="Szukaj">
     </form>
-          
-    {% if shops_nr and warehouses_nr%}  
-      <p> 
-        Wylosowano {{ shops_nr }} sklepów i {{ warehouses_nr }} magazynów. 
-        Magazyny są zaznaczone czerwonym kółkiem, a każdy sklep i trasy do niego tym samym kolorem.
-      </p>
-    {% endif %} 
 
-    <div id="div1"></div>
+    <div id="divinfo"></div>
+    <div id="divmap"></div>
   </div>
   </body>
 </html>
