@@ -32,8 +32,10 @@ def find(request, city):
             })
             
         input_data = {'shops_nr' : shops_nr, 'warehouses_nr' : warehouses_nr, 
-                      'shops' : [nodes.index(shop) + 1 for shop in shops], 'warehouses' : [nodes.index(warehouse) + 1 for warehouse in warehouses],
+                      'shops' : [nodes.index(shop) + 1 for shop in shops], 
+                      'warehouses' : [nodes.index(warehouse) + 1 for warehouse in warehouses],
                       'shops_needs' : shops_needs, 'warehouses_loads' : warehouses_loads}
+        
         return JsonResponse({'results' : results, 'input_data' : input_data})
     except (TypeError):
         return render(request, 'visualization/index.html', {
@@ -51,19 +53,14 @@ def get_graph(city):
 
 def randomize_places(G):
     shops_nr = rnd.randint(4, 10)
-    warehouses_nr = rnd.randint(4, shops_nr)
+    warehouses_nr = rnd.randint(4, 10)
     all = rnd.sample(G.nodes(), shops_nr + warehouses_nr)
 
     shops = all[:shops_nr]
     warehouses = all[shops_nr:]
 
-    shops_needs = []
-    warehouses_loads = []
-
-    for i in range(shops_nr):
-        shops_needs.append(rnd.randint(10, 40) * 10)
-    for i in range(warehouses_nr):
-        warehouses_loads.append(rnd.randint(10, 40) * 10)
+    shops_needs = [rnd.randint(10, 40) * 10 for i in range(shops_nr)]
+    warehouses_loads = [rnd.randint(10, 40) * 10 for i in range(warehouses_nr)]
     
     return shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads
 
