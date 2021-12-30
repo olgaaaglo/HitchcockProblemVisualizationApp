@@ -89,7 +89,8 @@ def write_to_file(G, shops, warehouses, shops_needs, warehouses_loads):
     input_file.close()
 
 def get_results(nodes):
-    process = Popen(['./../Algo/SimulatedAnnealingInTheHitchcockProblem/bin/Hitchcock', 'input.txt'])
+    #process = Popen(['./../Algo/SimulatedAnnealingInTheHitchcockProblem/bin/Hitchcock', 'input.txt'])
+    process = Popen(['./Hitchcock', 'input.txt'])
     process.wait()
 
     output_file = open("output.txt", "r")
