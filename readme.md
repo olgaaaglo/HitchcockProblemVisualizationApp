@@ -3,15 +3,15 @@ This app visualizes Hitchcock problem results. It downloads and processes data f
 
 To run app locally:
 
-Install osmnx: 
-conda config --prepend channels conda-forge
-conda create -n ox --strict-channel-priority osmnx
+Install osmnx:  
+conda config --prepend channels conda-forge  
+conda create -n ox --strict-channel-priority osmnx  
 
-Activate virtual environment:
-conda activate ox
+Activate virtual environment:  
+conda activate ox  
 
-Install packages:
-pip install -r requirements.txt
+Install packages:  
+pip install -r requirements.txt  
 
-Run:
-python manage.py runserver
+Run:  
+python manage.py runserver  
