@@ -17,7 +17,6 @@
       {% csrf_token %}
       <fieldset>
           <p>Podaj miasto:</p>
-          {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
           <input type="text" name="city" id="city">
       </fieldset>
       <input type="submit" value="Szukaj">
