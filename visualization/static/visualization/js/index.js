@@ -25,7 +25,7 @@ function visualize() {
         //`<p>Wylosowano ` + data['input_data']['shops_nr'] + ` sklepów i ` + data['input_data']['warehouses_nr'] + ` magazynów. 
         //`<p>Magazyny są zaznaczone kolorem czerwonym, a każdy sklep i trasy do niego tym samym innym od reszty kolorem.</p>`
 
-        divinfo.innerHTML += getTables(data)
+        divinfo.innerHTML = getTables(data)
 
         document.getElementById('change').innerHTML = 
         `<p>Magazyny są zaznaczone kolorem czerwonym, a każdy sklep i trasy do niego tym samym innym od reszty kolorem.</p>
