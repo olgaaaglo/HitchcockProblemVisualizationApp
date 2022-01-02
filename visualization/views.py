@@ -98,13 +98,15 @@ def read_file(nodes, simulatedAnnealing=True):
     with open("output.txt", "r") as output_file:
         output = output_file.read().split('\n---\n')
         routes = output[0]
-        cargos = output[1].split('\n')
+        cargos1 = output[1].split('\n')
         cargos2 = output[2].split('\n')
+        print(cargos1)
         print(cargos2)
         
-        if not simulatedAnnealing:
+        if simulatedAnnealing:
             cargos = cargos2
-        print(cargos)
+        else:
+            cargos = cargos1
 
         results = []
         lengths = []
