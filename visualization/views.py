@@ -8,15 +8,29 @@ from subprocess import Popen
 def index(request):
     return render(request, 'visualization/index.html')
 
-
 def find(request, city):
+    global G
     G = get_graph(city)
 
     shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads = randomize_places(G)
 
+    nodes = list(G.nodes())
+    input_data = {'shops_nr' : shops_nr, 'warehouses_nr' : warehouses_nr, 
+                    'shops' : [nodes.index(shop) + 1 for shop in shops], 
+                    'warehouses' : [nodes.index(warehouse) + 1 for warehouse in warehouses],
+                    'shops_needs' : shops_needs, 'warehouses_loads' : warehouses_loads}
+
     write_to_file(G, shops, warehouses, shops_needs, warehouses_loads)
 
-    routes, lengths, cargos = get_results(list(G.nodes()))
+    process = Popen(['./Hitchcock', 'input.txt'])
+    process.wait()
+
+    results = get_results(G)
+    
+    return JsonResponse({'results' : results, 'input_data' : input_data})
+
+def get_results(G, simulatedAnnealing=True):
+    routes, lengths, cargos = read_file(list(G.nodes()), simulatedAnnealing)
 
     nodes = list(G.nodes())
 
@@ -29,13 +43,12 @@ def find(request, city):
             "shop" : nodes.index(route[0]) + 1,
             "warehouse" : nodes.index(route[len(route) - 1]) + 1
         })
-        
-    input_data = {'shops_nr' : shops_nr, 'warehouses_nr' : warehouses_nr, 
-                    'shops' : [nodes.index(shop) + 1 for shop in shops], 
-                    'warehouses' : [nodes.index(warehouse) + 1 for warehouse in warehouses],
-                    'shops_needs' : shops_needs, 'warehouses_loads' : warehouses_loads}
     
-    return JsonResponse({'results' : results, 'input_data' : input_data})
+    return results
+
+def get_results_to_redraw(request, simulatedAnnealing):
+    results = get_results(G, bool(simulatedAnnealing))
+    return JsonResponse({'results' : results})
 
 def get_graph(city):
     nominatim = Nominatim()
@@ -81,14 +94,17 @@ def write_to_file(G, shops, warehouses, shops_needs, warehouses_loads):
 
         input_file.write('\n---')
 
-def get_results(nodes):
-    process = Popen(['./Hitchcock', 'input.txt'])
-    process.wait()
-
+def read_file(nodes, simulatedAnnealing=True):
     with open("output.txt", "r") as output_file:
         output = output_file.read().split('\n---\n')
         routes = output[0]
         cargos = output[1].split('\n')
+        cargos2 = output[2].split('\n')
+        print(cargos2)
+        
+        if not simulatedAnnealing:
+            cargos = cargos2
+        print(cargos)
 
         results = []
         lengths = []

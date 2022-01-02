@@ -13,5 +13,7 @@ conda activate ox
 Install packages:  
 pip install -r requirements.txt  
 
+Change DEBUG = False to True in App/settings.py  
+
 Run:  
 python manage.py runserver  
