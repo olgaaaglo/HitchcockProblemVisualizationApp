@@ -1,7 +1,9 @@
 function visualize() {
     const city = document.getElementById("city").value;
+    const shop = document.getElementById("shop").value;
+    const warehouse = document.getElementById("warehouse").value;
 
-    fetch('/visualization/find/' + city,{
+    fetch('/visualization/find/' + city + '/' + shop + '/' + warehouse,{
         method: 'GET',
         headers:{
             'Content-Type': 'application/json',
@@ -20,13 +22,14 @@ function visualize() {
     .then(data => {
         let divinfo = document.getElementById('divinfo')
         divinfo.innerHTML = 
-        `<p>Wylosowano ` + data['input_data']['shops_nr'] + ` sklepów i ` + data['input_data']['warehouses_nr'] + ` magazynów. 
-        Magazyny są zaznaczone kolorem czerwonym, a każdy sklep i trasy do niego tym samym innym kolorem.</p>`
+        //`<p>Wylosowano ` + data['input_data']['shops_nr'] + ` sklepów i ` + data['input_data']['warehouses_nr'] + ` magazynów. 
+        //`<p>Magazyny są zaznaczone kolorem czerwonym, a każdy sklep i trasy do niego tym samym innym od reszty kolorem.</p>`
 
         divinfo.innerHTML += getTables(data)
 
         document.getElementById('change').innerHTML = 
-        `<h3>Wyniki dla algorytmu symulowanego wyżarzania</h3>
+        `<p>Magazyny są zaznaczone kolorem czerwonym, a każdy sklep i trasy do niego tym samym innym od reszty kolorem.</p>
+        <h3 class="header">Wyniki dla algorytmu symulowanego wyżarzania</h3>
         <form action="javascript:reDrawMap()" method="post">
             <input type="submit" value="Rysuj dla algorytmu transportowego" id="changeButton">
         </form>`
@@ -47,7 +50,7 @@ function drawMap(data) {
 
     for (let i = 0; i < data.length; i++)
     {
-        let shop_color = colors[shops.indexOf(data[i]["shop"])]
+        let shop_color = colors[shops.indexOf(data[i]["shop"]) % 10]
 
         let mapdata = {
                 type: "scattermapbox",
@@ -102,7 +105,6 @@ function drawMap(data) {
                 },
         margin: { r: 0, t: 0, b: 0, l: 0 }
     };
-    
     Plotly.newPlot("divmap", alldata, layout);
 }
 
@@ -137,7 +139,8 @@ function reDrawMap() {
     })
     .then(data => {
         document.getElementById('change').innerHTML = 
-        `<h3>` + text + `</h3>
+        `<p>Magazyny są zaznaczone kolorem czerwonym, a każdy sklep i trasy do niego tym samym innym od reszty kolorem.</p>
+        <h3 class="header">` + text + `</h3>
         <form action="javascript:reDrawMap()" method="post">
             <input type="submit" value="` + buttonValue + `" id="changeButton">
         </form>`
@@ -159,7 +162,7 @@ function getTables(data) {
         </tr>
         </thead>
         <tbody>`
-    for (let i = 0; i < data['input_data']['shops_nr']; i++) {
+    for (let i = 0; i < data['input_data']['shops'].length; i++) {
         tables += 
         `<tr>
             <td>` + data['input_data']['shops'][i] + `</td>
@@ -177,7 +180,7 @@ function getTables(data) {
         </tr>
         </thead>
         <tbody>`
-    for (let i = 0; i < data['input_data']['warehouses_nr']; i++) {
+    for (let i = 0; i < data['input_data']['warehouses'].length; i++) {
         tables += 
         `<tr>
             <td>` + data['input_data']['warehouses'][i] + `</td> 

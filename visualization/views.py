@@ -8,14 +8,15 @@ from subprocess import Popen
 def index(request):
     return render(request, 'visualization/index.html')
 
-def find(request, city):
+def find(request, city, shops_nr, warehouses_nr):
     global G
     G = get_graph(city)
 
-    shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads = randomize_places(G)
+    #shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads = randomize_places(G)
+    shops, warehouses, shops_needs, warehouses_loads = randomize_places(G, shops_nr, warehouses_nr)
 
     nodes = list(G.nodes())
-    input_data = {'shops_nr' : shops_nr, 'warehouses_nr' : warehouses_nr, 
+    input_data = {#'shops_nr' : shops_nr, 'warehouses_nr' : warehouses_nr, 
                     'shops' : [nodes.index(shop) + 1 for shop in shops], 
                     'warehouses' : [nodes.index(warehouse) + 1 for warehouse in warehouses],
                     'shops_needs' : shops_needs, 'warehouses_loads' : warehouses_loads}
@@ -59,9 +60,9 @@ def get_graph(city):
 
     return G
 
-def randomize_places(G):
-    shops_nr = rnd.randint(4, 10)
-    warehouses_nr = rnd.randint(4, 10)
+def randomize_places(G, shops_nr, warehouses_nr):
+    # shops_nr = 30#rnd.randint(4, 10)
+    # warehouses_nr = 10#rnd.randint(4, 10)
     all = rnd.sample(G.nodes(), shops_nr + warehouses_nr)
 
     shops = all[:shops_nr]
@@ -70,7 +71,8 @@ def randomize_places(G):
     shops_needs = [rnd.randint(10, 40) * 10 for i in range(shops_nr)]
     warehouses_loads = [rnd.randint(10, 40) * 10 for i in range(warehouses_nr)]
     
-    return shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads
+    #return shops_nr, warehouses_nr, shops, warehouses, shops_needs, warehouses_loads
+    return shops, warehouses, shops_needs, warehouses_loads
 
 def write_to_file(G, shops, warehouses, shops_needs, warehouses_loads):
     nodes = list(G.nodes())

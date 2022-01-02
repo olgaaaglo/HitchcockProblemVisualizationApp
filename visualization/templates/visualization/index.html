@@ -12,14 +12,18 @@
   <body>
     <div id="main">
 
-    <h2>Wizualizacja tras przewozu produktów z magazynów do sklepów</h2>
+    <h2 class="header">Wizualizacja tras przewozu produktów z magazynów do sklepów</h2>
     <form action="javascript:visualize()" method="post">
       {% csrf_token %}
       <fieldset>
-          <p>Podaj miasto:</p>
-          <input type="text" name="city" id="city">
+          <label for="city">Miasto:</label>
+          <input type="text" name="city" id="city" value="Wadowice"><br/>
+          <label for="shop">Liczba sklepów:</label>
+          <input type="number" id="shop" name="shop" value="10"><br/>
+          <label for="warehouse">Liczba magazynów:</label>
+          <input type="number" id="warehouse" name="warehouse" value="10"><br/>
+        <input type="submit" value="Wizualizuj">
       </fieldset>
-      <input type="submit" value="Szukaj">
     </form>
 
     <div id="divinfo"></div>
