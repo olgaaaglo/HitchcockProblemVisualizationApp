@@ -20,19 +20,16 @@ function visualize() {
         return result
     })
     .then(data => {
-        let divinfo = document.getElementById('divinfo')
-        divinfo.innerHTML = 
-        //`<p>Wylosowano ` + data['input_data']['shops_nr'] + ` sklepów i ` + data['input_data']['warehouses_nr'] + ` magazynów. 
-        //`<p>Magazyny są zaznaczone kolorem czerwonym, a każdy sklep i trasy do niego tym samym innym od reszty kolorem.</p>`
+        let divinfo = document.getElementById('divinfo');
 
-        divinfo.innerHTML = getTables(data)
+        divinfo.innerHTML = getTables(data);
 
         document.getElementById('change').innerHTML = 
         `<p>Magazyny są zaznaczone kolorem czerwonym, a każdy sklep i trasy do niego tym samym innym od reszty kolorem.</p>
         <h3 class="header">Wyniki dla algorytmu symulowanego wyżarzania</h3>
         <form action="javascript:reDrawMap()" method="post">
             <input type="submit" value="Rysuj dla algorytmu transportowego" id="changeButton">
-        </form>`
+        </form>`;
 
         drawMap(data);
     })
