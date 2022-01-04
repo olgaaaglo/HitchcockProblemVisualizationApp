@@ -15,6 +15,7 @@ def find(request, city, shops_nr, warehouses_nr):
     shops, warehouses, shops_needs, warehouses_loads = randomize_places(G, shops_nr, warehouses_nr)
 
     nodes = list(G.nodes())
+    global input_data
     input_data = {'shops' : [nodes.index(shop) + 1 for shop in shops], 
                     'warehouses' : [nodes.index(warehouse) + 1 for warehouse in warehouses],
                     'shops_needs' : shops_needs, 'warehouses_loads' : warehouses_loads}
@@ -47,7 +48,7 @@ def get_results(G, simulatedAnnealing=True):
 
 def get_results_to_redraw(request, simulatedAnnealing):
     results = get_results(G, bool(simulatedAnnealing))
-    return JsonResponse({'results' : results})
+    return JsonResponse({'results' : results, 'input_data' : input_data})
 
 def get_graph(city):
     nominatim = Nominatim()
@@ -108,12 +109,12 @@ def read_file(nodes, simulatedAnnealing=True):
         results = []
         lengths = []
         for count, route in enumerate(routes.split('\n')):
-            if cargos[count] != '0':
-                array = route.split()
-                results.append([nodes[int(i) - 1] for i in array[:len(array) - 1]])
-                lengths.append(float(array[len(array) - 1]))
+            #if cargos[count] != '0':
+            array = route.split()
+            results.append([nodes[int(i) - 1] for i in array[:len(array) - 1]])
+            lengths.append(float(array[len(array) - 1]))
         
-        cargos = [cargo for cargo in cargos if cargo != '0']
+        #cargos = [cargo for cargo in cargos if cargo != '0']
 
     return results, lengths, cargos
 

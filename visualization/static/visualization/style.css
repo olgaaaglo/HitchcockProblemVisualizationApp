@@ -28,18 +28,19 @@ table {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
   
-thead tr {
-    background-color: orangered;
+th {
+    background-color: #ff704d;
     color: #ffffff;
     text-align: left;
 }
 
 th, td {
     padding: 10px 10px;
+    border: 1px solid black;
 }
 
 tbody tr {
-    border-bottom: 1px solid #dddddd;
+    border-bottom: 1px solid;
 }
 
 #tab1 {
@@ -50,4 +51,12 @@ tbody tr {
 #tab2 {
     display: inline-block;
     vertical-align:top;
+}
+
+thead tr th.leftBorder, tbody tr td.leftBorder {
+    border-left: 3px double black;
+}
+
+tbody tr th.topBorder, tbody tr td.topBorder {
+    border-top: 3px double black;
 }
