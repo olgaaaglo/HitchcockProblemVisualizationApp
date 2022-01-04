@@ -109,12 +109,9 @@ def read_file(nodes, simulatedAnnealing=True):
         results = []
         lengths = []
         for count, route in enumerate(routes.split('\n')):
-            #if cargos[count] != '0':
             array = route.split()
             results.append([nodes[int(i) - 1] for i in array[:len(array) - 1]])
             lengths.append(float(array[len(array) - 1]))
-        
-        #cargos = [cargo for cargo in cargos if cargo != '0']
 
     return results, lengths, cargos
 

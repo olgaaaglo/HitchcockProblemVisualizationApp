@@ -153,46 +153,6 @@ function reDrawMap() {
     })
 }
 
-// function getInputTables(data) {
-//     let tables =
-//         `<table id="tab1">
-//         <thead>
-//         <tr>
-//           <th>Sklep</th>
-//           <th>Zapotrzebowanie</th>
-//         </tr>
-//         </thead>
-//         <tbody>`
-//     for (let i = 0; i < data['input_data']['shops'].length; i++) {
-//         tables += 
-//         `<tr>
-//             <td>` + data['input_data']['shops'][i] + `</td>
-//             <td>` + data['input_data']['shops_needs'][i] + `</td>
-//         </tr>`
-//     }
-//     tables += `</tbody></table>`
-
-//     tables += 
-//         `<table id="tab2">
-//         <thead>
-//         <tr>
-//           <th>Magazyn</th>
-//           <th>Zasoby</th>
-//         </tr>
-//         </thead>
-//         <tbody>`
-//     for (let i = 0; i < data['input_data']['warehouses'].length; i++) {
-//         tables += 
-//         `<tr>
-//             <td>` + data['input_data']['warehouses'][i] + `</td> 
-//             <td>` + data['input_data']['warehouses_loads'][i] + `</td>
-//         </tr>`
-//     }
-//     tables += `</tbody></table>`
-
-//     return tables
-// }
-
 function getResultTables(data) {
     let input = data['input_data'];
     data = data["results"];
@@ -211,8 +171,8 @@ function getResultTables(data) {
 
     let warehouse_sum = 0;
 
-    let sumaNadmiaruPodazy = 0;
-    let sumaNadmiaruPopytu = 0;
+    let supplyExcessSum = 0;
+    let demandExcessSum = 0;
 
     for (let i = 0; i < data.length; i++) {
         if (i < shops_nr) {
@@ -253,7 +213,7 @@ function getResultTables(data) {
 
             body2 += `<td>` + (warehouse_load - rowSum != 0 ? warehouse_load - rowSum : "") + `</td>`;
             
-            sumaNadmiaruPodazy += warehouse_load - rowSum;
+            supplyExcessSum += warehouse_load - rowSum;
             rowSum = 0;
             
             body2 += `<td class="leftBorder">` + warehouse_load + `</td></tr>`;
@@ -266,7 +226,7 @@ function getResultTables(data) {
     let overload = "";
     for (let i = 0; i < shops_nr; i++) {
         overload += `<td>` + (columnSum[i] != 0 ? columnSum[i] : "") + `</td>`;
-        sumaNadmiaruPopytu += columnSum[i];
+        demandExcessSum += columnSum[i];
     }
 
     let tables =
@@ -302,9 +262,9 @@ function getResultTables(data) {
         `</thead>
         <tbody>` + body2 + 
         `<tr><th>Nadmiar popytu</th>` + overload + `<td></td><td class="leftBorder">`
-        + sumaNadmiaruPopytu + `</td></tr>` + last2 + 
-        `<td class="topBorder">` + sumaNadmiaruPodazy + `</td>
-        <td class="leftBorder topBorder">` + (warehouse_sum + sumaNadmiaruPopytu) + `</td>
+        + demandExcessSum + `</td></tr>` + last2 + 
+        `<td class="topBorder">` + supplyExcessSum + `</td>
+        <td class="leftBorder topBorder">` + (warehouse_sum + demandExcessSum) + `</td>
         </tr>
         </tbody>
         </table>`;
