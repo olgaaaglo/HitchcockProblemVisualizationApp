@@ -12,6 +12,7 @@ function visualize() {
     .then(response => {
         const result = response.json()
         const status_code = response.status;
+        console.log(status_code)
         if(status_code != 200) {
             console.log('Error in getting info!')
             return false;
@@ -20,7 +21,7 @@ function visualize() {
         return result
     })
     .then(data => {
-
+        console.log(data);
         document.getElementById('divinfo').innerHTML = 
         `<p>Magazyny są zaznaczone kolorem czerwonym, a każdy sklep i trasy do niego tym samym innym od reszty kolorem.</p>`; //getInputTables(data);
 
@@ -42,6 +43,7 @@ function visualize() {
 function drawMap(data) {
     let alldata = [];
     data = data["results"];
+    console.log(data);
     
     const colors = ["fuchsia", "blue", "green", "orange", "cyan", "purple", "black", "hotpink", "brown", "yellow"]
     const shops = data.map((element) => element["shop"]).filter((value, index, self) => self.indexOf(value) === index)
